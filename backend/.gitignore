@@ -1,0 +1,19 @@
+# Dependency directories
+/node_modules
+
+# Environment variables
+.env
+
+# Logs and databases
+npm-debug.log*
+.DS_Store
+*.sqlite
+/tmp
+
+
+
+
+
+# Sensitive files and directories
+/uploads
+/dist
