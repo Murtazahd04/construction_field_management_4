@@ -15,6 +15,7 @@ const Worker = require('./Worker');
 const Attendance = require('./Attendance');
 const MaterialInvoice = require('./MaterialInvoice');
 const InvoiceItem = require('./InvoiceItem');
+const Enquiry = require('./Enquiry');
 // --- Define Relationships ---
 // --- DEBUG LINE: Add this temporarily ---
 console.log("Contractor Model:", Contractor); 
@@ -119,5 +120,5 @@ module.exports = {
     ProjectContractor,
     DailyProgressReport,
     Material, MaterialRequest, MaterialRequestItem,
-    Worker, Attendance, MaterialInvoice, InvoiceItem,
+    Worker, Attendance, MaterialInvoice, InvoiceItem,Enquiry,
 };

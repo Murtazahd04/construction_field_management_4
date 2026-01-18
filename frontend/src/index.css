@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  /* Define your custom colors here */
+  --color-primary: #2563EB;
+  --color-secondary: #64748B;
+}
+
+/* Custom Utilities */
+.auth-container {
+  @apply min-h-screen w-full flex items-center justify-center bg-gray-50 p-4;
+}
+
+.auth-card {
+  @apply w-full max-w-md bg-white rounded-xl shadow-lg p-8 border border-gray-100;
+}
+
+.input-field {
+  /* Now 'focus:ring-primary' will work because we defined it in @theme above */
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg outline-none transition-all focus:ring-2 focus:ring-primary focus:border-transparent;
+}

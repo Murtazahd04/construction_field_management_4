@@ -9,6 +9,7 @@ const materialRoutes = require('./routes/materialRoutes');
 const workerRoutes = require('./routes/workerRoutes');
 const invoiceRoutes = require('./routes/invoiceRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const enquiryRoutes = require('./routes/enquiryRoutes');
 const app = express();
 
 // Middleware
@@ -23,6 +24,7 @@ app.use('/api/materials', materialRoutes);
 app.use('/api/workers', workerRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/enquiry', enquiryRoutes);
 // Sync Database and Start Server
 // force: false means "don't delete my data if table exists"
 db.sequelize.sync({ force: false }).then(() => {
