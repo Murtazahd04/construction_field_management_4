@@ -13,6 +13,8 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  
+
   // Fetch Enquiries
   const fetchEnquiries = async () => {
     try {
@@ -39,14 +41,6 @@ const AdminPanel = () => {
     navigate('/admin-login');
   };
 
-  // Placeholder functions for now
-  const handleApprove = (id) => {
-    console.log("Approve Clicked for:", id);
-  };
-
-  const handleReject = (id) => {
-    console.log("Reject Clicked for:", id);
-  };
 
   if (loading) {
     return (
@@ -55,7 +49,32 @@ const AdminPanel = () => {
       </div>
     );
   }
+const handleApprove = async (id) => {
+    if(!window.confirm("Approve this user? This will generate a password and email it to them.")) return;
+    
+    const toastId = toast.loading("Creating account and sending email...");
+    
+    try {
+      await apiyb.put(`/enquiry/${id}/approve`);
+      toast.success("Approved! Credentials sent.", { id: toastId });
+      fetchEnquiries(); // Refresh table
+    } catch (error) {
+      console.error(error);
+      toast.error("Approval failed. Check server logs.", { id: toastId });
+    }
+  };
 
+  const handleReject = async (id) => {
+    if(!window.confirm("Are you sure you want to reject this request?")) return;
+
+    try {
+      await apiyb.put(`/enquiry/${id}/reject`);
+      toast.success("Enquiry marked as Rejected.");
+      fetchEnquiries(); // Refresh table
+    } catch (error) {
+      toast.error("Rejection failed.");
+    }
+  };
   return (
     <div className="flex h-screen bg-gray-100">
       
