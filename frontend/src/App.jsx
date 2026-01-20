@@ -3,10 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { Toaster } from 'react-hot-toast';
+
+// Page Imports
 import Login from './pages/Login';
 import Enquiry from './pages/Enquiry';
 import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
+import Projects from './pages/Projects'; // <--- New Import for Member 2
 
 function App() {
   return (
@@ -14,11 +17,20 @@ function App() {
       <Router>
         <Toaster position="top-right" />
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/register-enquiry" element={<Enquiry />} />
+          
+          {/* Admin Routes */}
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel/>} />
+          
+          {/* User/Member 2 Routes */}
           <Route path="/dashboard" element={<div className="p-10">Dashboard Coming Soon...</div>} />
+          <Route path="/projects" element={<Projects />} /> {/* <--- New Route */}
+          
+          {/* Placeholder for Project Details (Coming next) */}
+          <Route path="/projects/:id" element={<div className="p-10">Project Details View Coming Soon...</div>} />
         </Routes>
       </Router>
     </Provider>
