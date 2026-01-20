@@ -9,7 +9,8 @@ import Login from './pages/Login';
 import Enquiry from './pages/Enquiry';
 import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
-import Projects from './pages/Projects'; // <--- New Import for Member 2
+import Projects from './pages/Projects'; 
+import ProjectDetails from './pages/ProjectDetails'; // <--- New Import
 
 function App() {
   return (
@@ -27,10 +28,10 @@ function App() {
           
           {/* User/Member 2 Routes */}
           <Route path="/dashboard" element={<div className="p-10">Dashboard Coming Soon...</div>} />
-          <Route path="/projects" element={<Projects />} /> {/* <--- New Route */}
+          <Route path="/projects" element={<Projects />} />
           
-          {/* Placeholder for Project Details (Coming next) */}
-          <Route path="/projects/:id" element={<div className="p-10">Project Details View Coming Soon...</div>} />
+          {/* New Details Route */}
+          <Route path="/projects/:id" element={<ProjectDetails />} />
         </Routes>
       </Router>
     </Provider>
