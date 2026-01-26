@@ -1,152 +1,172 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProjects, createProject } from '../features/projects/projectSlice';
-import { Plus, MapPin, Calendar, DollarSign, Briefcase, X, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { fetchProjectDetails, assignContractor } from '../features/projects/projectSlice';
+import { Loader2, MapPin, Calendar, DollarSign, Users, Plus, ArrowLeft } from 'lucide-react';
 
-const Projects = () => {
-  const dispatch = useDispatch();
+const ProjectDetails = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { list: projects, loading } = useSelector((state) => state.projects);
+  const dispatch = useDispatch();
   
-  // Modal State
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    project_name: '',
-    project_code: '',
-    location: '',
-    budget: '',
-    start_date: '',
-    end_date: ''
+  const { currentProject, contractorsList, loading } = useSelector((state) => state.projects);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  
+  // Form State for Assignment
+  const [assignData, setAssignData] = useState({
+    contractor_id: '',
+    work_scope: '',
+    contract_value: ''
   });
 
   useEffect(() => {
-    dispatch(fetchProjects());
-  }, [dispatch]);
+    dispatch(fetchProjectDetails(id));
+    dispatch(fetchContractors());
+  }, [dispatch, id]);
 
-  const handleSubmit = async (e) => {
+  const handleAssign = (e) => {
     e.preventDefault();
-    const result = await dispatch(createProject(formData));
-    if (result.type === 'projects/create/fulfilled') {
-      setShowModal(false);
-      setFormData({ project_name: '', project_code: '', location: '', budget: '', start_date: '', end_date: '' });
-    }
+    dispatch(assignContractor({ 
+        project_id: id, 
+        ...assignData 
+    }));
+    setShowAssignModal(false);
   };
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  if (loading || !currentProject) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin" /></div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-500 text-sm">Manage active construction sites</p>
+    <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+      
+      {/* Back Button */}
+      <button onClick={() => navigate('/projects')} className="flex items-center text-gray-500 hover:text-blue-600 mb-6 transition">
+        <ArrowLeft className="w-4 h-4 mr-1" /> Back to Projects
+      </button>
+
+      {/* Project Header */}
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-200">
+        <div className="flex justify-between items-start">
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900">{currentProject.project_name}</h1>
+                <p className="text-gray-500 flex items-center gap-1 mt-1">
+                    <MapPin className="w-4 h-4" /> {currentProject.location} | Code: {currentProject.project_code}
+                </p>
+            </div>
+            <span className="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm font-semibold capitalize">
+                {currentProject.status}
+            </span>
         </div>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition"
-        >
-          <Plus className="w-4 h-4" /> New Project
-        </button>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 border-t border-gray-100 pt-6">
+            <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-50 rounded-lg text-blue-600"><DollarSign /></div>
+                <div>
+                    <p className="text-sm text-gray-500">Budget</p>
+                    <p className="font-bold text-lg">${Number(currentProject.budget).toLocaleString()}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="p-3 bg-purple-50 rounded-lg text-purple-600"><Calendar /></div>
+                <div>
+                    <p className="text-sm text-gray-500">Timeline</p>
+                    <p className="font-medium">{new Date(currentProject.start_date).toLocaleDateString()} - {new Date(currentProject.end_date).toLocaleDateString()}</p>
+                </div>
+            </div>
+        </div>
       </div>
 
-      {/* Project Grid */}
-      {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-blue-600 w-8 h-8" /></div>
-      ) : projects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <div 
-              key={project.project_id} 
-              onClick={() => navigate(`/projects/${project.project_id}`)}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition cursor-pointer group"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div className="bg-blue-50 p-3 rounded-lg group-hover:bg-blue-100 transition">
-                  <Briefcase className="w-6 h-6 text-blue-600" />
+      {/* Contractors Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold flex items-center gap-2"><Users className="w-5 h-5" /> Assigned Contractors</h2>
+                    <button 
+                        onClick={() => setShowAssignModal(true)}
+                        className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:bg-black transition"
+                    >
+                        <Plus className="w-4 h-4" /> Assign New
+                    </button>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium 
-                  ${project.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                  {project.status || 'Active'}
-                </span>
-              </div>
-              
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{project.project_name}</h3>
-              <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> {project.location}
-              </p>
 
-              <div className="space-y-2 border-t border-gray-50 pt-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 flex items-center gap-2"><Calendar className="w-4 h-4" /> Start</span>
-                  <span className="font-medium">{new Date(project.start_date).toLocaleDateString()}</span>
+                <div className="space-y-3">
+                    {currentProject.contractors && currentProject.contractors.length > 0 ? (
+                        currentProject.contractors.map((c) => (
+                            <div key={c.user_id} className="p-4 border border-gray-100 rounded-lg flex justify-between items-center hover:bg-gray-50 transition">
+                                <div>
+                                    <h4 className="font-semibold text-gray-900">{c.username}</h4>
+                                    <p className="text-sm text-gray-500">{c.email}</p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-xs bg-gray-200 px-2 py-1 rounded text-gray-600">Contractor</span>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-400 text-center py-4 italic">No contractors assigned yet.</p>
+                    )}
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500 flex items-center gap-2"><DollarSign className="w-4 h-4" /> Budget</span>
-                  <span className="font-medium text-gray-900">${Number(project.budget).toLocaleString()}</span>
-                </div>
-              </div>
             </div>
-          ))}
         </div>
-      ) : (
-        <div className="text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-500">No projects found. Create your first one!</p>
-        </div>
-      )}
 
-      {/* Create Project Modal */}
-      {showModal && (
+        {/* Placeholder for Member 2 Task 2: DPR List */}
+        <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 h-full">
+                <h2 className="text-xl font-bold mb-4">Daily Reports</h2>
+                <div className="text-center py-10 bg-gray-50 rounded border border-dashed">
+                    <p className="text-gray-400 text-sm">Select a contractor to view reports.</p>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* Assign Modal */}
+      {showAssignModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold">Create New Project</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><X /></button>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+                <h2 className="text-xl font-bold mb-4">Assign Contractor</h2>
+                <form onSubmit={handleAssign} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Select Contractor</label>
+                        <select 
+                            className="input-field" 
+                            required
+                            onChange={(e) => setAssignData({...assignData, contractor_id: e.target.value})}
+                        >
+                            <option value="">-- Choose --</option>
+                            {contractorsList.map(c => (
+                                <option key={c.user_id} value={c.user_id}>{c.username} ({c.email})</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Work Scope</label>
+                        <input 
+                            className="input-field" 
+                            placeholder="e.g. Electrical Wiring"
+                            onChange={(e) => setAssignData({...assignData, work_scope: e.target.value})}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Contract Value</label>
+                        <input 
+                            type="number"
+                            className="input-field" 
+                            placeholder="$$$"
+                            onChange={(e) => setAssignData({...assignData, contract_value: e.target.value})}
+                        />
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                        <button type="button" onClick={() => setShowAssignModal(false)} className="flex-1 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Assign</button>
+                    </div>
+                </form>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
-                  <input name="project_name" required onChange={handleChange} className="input-field" placeholder="e.g. Skyline Towers" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Project Code</label>
-                  <input name="project_code" required onChange={handleChange} className="input-field" placeholder="e.g. SK-2024" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <input name="location" required onChange={handleChange} className="input-field" placeholder="City, State" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Total Budget</label>
-                <input name="budget" type="number" required onChange={handleChange} className="input-field" placeholder="1000000" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                  <input name="start_date" type="date" required onChange={handleChange} className="input-field" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                  <input name="end_date" type="date" required onChange={handleChange} className="input-field" />
-                </div>
-              </div>
-
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-4">
-                Create Project
-              </button>
-            </form>
-          </div>
         </div>
       )}
+
     </div>
   );
 };
 
-export default Projects;
+export default ProjectDetails;

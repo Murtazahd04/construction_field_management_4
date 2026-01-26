@@ -34,7 +34,7 @@ exports.getAttendanceTrends = async (req, res) => {
     }
 };
 
-// 4. Get Late Comers (For the "Shame" List)
+// 4. Get Late Comers 
 exports.getLateComers = async (req, res) => {
     try {
         const [results] = await sequelize.query(
