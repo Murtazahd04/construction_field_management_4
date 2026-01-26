@@ -50,6 +50,44 @@ export const submitEnquiry = createAsyncThunk('auth/enquiry', async (data, thunk
   }
 });
 
+// 1. REGISTER COMPANY (Public)
+export const registerCompany = createAsyncThunk('auth/registerCompany', async (companyData, thunkAPI) => {
+  try {
+    const response = await apiyb.post('/auth/register-company', companyData);
+    toast.success(response.data.message);
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Registration failed';
+    toast.error(message);
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
+// 2. FETCH PENDING COMPANIES (Admin Only)
+export const fetchPendingCompanies = createAsyncThunk('auth/fetchPending', async (_, thunkAPI) => {
+  try {
+    const response = await apiyb.get('/auth/admin/pending-companies');
+    return response.data;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Failed to fetch requests';
+    toast.error(message);
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
+// 3. APPROVE COMPANY (Admin Only)
+export const approveCompany = createAsyncThunk('auth/approveCompany', async (ownerId, thunkAPI) => {
+  try {
+    const response = await apiyb.post('/auth/admin/approve-company', { owner_id: ownerId });
+    toast.success("Company Approved Successfully!");
+    return response.data; // Contains { company, generated_credentials }
+  } catch (error) {
+    const message = error.response?.data?.message || 'Approval failed';
+    toast.error(message);
+    return thunkAPI.rejectWithValue(message);
+  }
+});
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -57,6 +95,9 @@ const authSlice = createSlice({
     token: localStorage.getItem('token') || null,
     isLoading: false,
     error: null,
+    // NEW STATE VARIABLES
+    pendingCompanies: [], // List of companies waiting for approval
+    approvalResult: null, // Stores the generated password after approval
   },
   reducers: {
     logout: (state) => {
@@ -64,11 +105,17 @@ const authSlice = createSlice({
       localStorage.removeItem('user');
       state.user = null;
       state.token = null;
+      state.pendingCompanies = [];
+      state.approvalResult = null;
     },
+    // Action to clear the "Green Box" after admin copies password
+    clearApprovalResult: (state) => {
+      state.approvalResult = null;
+    }
   },
   extraReducers: (builder) => {
     builder
-      // Login Cases
+     // Login Cases
       .addCase(loginUser.pending, (state) => { state.isLoading = true; })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -79,9 +126,43 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      
+
+      // REGISTER COMPANY
+      .addCase(registerCompany.pending, (state) => { state.isLoading = true; })
+      .addCase(registerCompany.fulfilled, (state) => { state.isLoading = false; })
+      .addCase(registerCompany.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // FETCH PENDING
+      .addCase(fetchPendingCompanies.pending, (state) => { state.isLoading = true; })
+      .addCase(fetchPendingCompanies.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.pendingCompanies = action.payload;
+      })
+      .addCase(fetchPendingCompanies.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // APPROVE COMPANY
+      .addCase(approveCompany.pending, (state) => { state.isLoading = true; })
+      .addCase(approveCompany.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.approvalResult = action.payload; // Store credentials to show Admin
+        // Remove the approved company from the pending list immediately
+        state.pendingCompanies = state.pendingCompanies.filter(
+            c => c.owner_id !== action.meta.arg // ownerId passed to thunk
+        ); 
+      })
+      .addCase(approveCompany.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      });
   },
 });
 
-export const { logout } = authSlice.actions;
+
+export const { logout,clearApprovalResult } = authSlice.actions;
 export default authSlice.reducer;

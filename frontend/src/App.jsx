@@ -12,6 +12,7 @@ import AdminPanel from './pages/AdminPanel';
 import Projects from './pages/Projects'; // <--- New Import for Member 2
 import Dashboard from './pages/Dashboard'; // <--- Add this import
 import Materials from './pages/Materials'; // <--- Import
+import RegisterCompany from './pages/RegisterCompany'; // <--- NEW IMPORT
 function App() {
   return (
     <Provider store={store}>
@@ -19,13 +20,15 @@ function App() {
         <Toaster position="top-right" />
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register-enquiry" element={<Enquiry />} />
+          
+          <Route path="/register-enquiry" element={<Enquiry />} />
+          <Route path="/register-company" element={<RegisterCompany />} /> {/* <--- NEW ROUTE */}
           
           {/* Admin Routes */}
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin-panel" element={<AdminPanel/>} />
-          
           {/* User/Member 2 Routes */}
           <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/projects" element={<Projects />} /> {/* <--- New Route */}

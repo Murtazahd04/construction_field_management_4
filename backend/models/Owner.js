@@ -11,7 +11,12 @@ const Owner = sequelize.define('Owner', {
     contact_person: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
     phone: { type: DataTypes.STRING },
-    address: { type: DataTypes.TEXT }
+    address: { type: DataTypes.TEXT },
+    // Add the status field here
+    status: { 
+        type: DataTypes.ENUM('pending', 'approved', 'rejected'), 
+        defaultValue: 'pending' 
+    }
 }, {
     tableName: 'owners',
     timestamps: true,
