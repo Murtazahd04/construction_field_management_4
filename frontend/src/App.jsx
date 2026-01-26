@@ -11,7 +11,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
 import Projects from './pages/Projects'; // <--- New Import for Member 2
 import Dashboard from './pages/Dashboard'; // <--- Add this import
-
+import Materials from './pages/Materials'; // <--- Import
 function App() {
   return (
     <Provider store={store}>
@@ -27,11 +27,11 @@ function App() {
           <Route path="/admin-panel" element={<AdminPanel/>} />
           
           {/* User/Member 2 Routes */}
-          <Route path="/dashboard" element={<div className="p-10">Dashboard Coming Soon...</div>} />
+          <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/projects" element={<Projects />} /> {/* <--- New Route */}
-          
+          <Route path="/materials" element={<Materials />} />
           {/* Placeholder for Project Details (Coming next) */}
-          <Route path="/projects/:id" element={<div className="p-10">Project Details View Coming Soon...</div>} />
+          <Route path="/projects/:id" element={<Projects/>} />
         </Routes>
       </Router>
     </Provider>

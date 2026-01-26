@@ -66,11 +66,11 @@ Project.hasMany(MaterialRequest, { foreignKey: 'project_id' });
 MaterialRequest.belongsTo(Project, { foreignKey: 'project_id' });
 
 User.hasMany(MaterialRequest, { foreignKey: 'requested_by' });
-MaterialRequest.belongsTo(User, { foreignKey: 'requested_by' });
+MaterialRequest.belongsTo(User, { foreignKey: 'requested_by' ,as: 'Requestor'});
 
 // A Request has many Items
 MaterialRequest.hasMany(MaterialRequestItem, { foreignKey: 'request_id' });
-MaterialRequestItem.belongsTo(MaterialRequest, { foreignKey: 'request_id' });
+MaterialRequestItem.belongsTo(MaterialRequest, { foreignKey: 'request_id' ,as: 'Requestor'});
 
 // An Item links to a Material Definition
 Material.hasMany(MaterialRequestItem, { foreignKey: 'material_id' });

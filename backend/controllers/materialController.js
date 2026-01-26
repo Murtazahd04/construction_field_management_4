@@ -1,5 +1,4 @@
-const { Material, MaterialRequest, MaterialRequestItem, User } = require('../models');
-
+const { Material, MaterialRequest, MaterialRequestItem, User, SubContractor } = require('../models');
 // 1. Add a New Material to Master List (One time setup usually)
 exports.createMaterial = async (req, res) => {
     try {
@@ -62,6 +61,73 @@ exports.getAllMaterials = async (req, res) => {
     try {
         const materials = await Material.findAll();
         res.json(materials);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+// 4. Get All Requests (For Approval Hub)
+exports.getRequests = async (req, res) => {
+    try {
+        const requests = await MaterialRequest.findAll({
+            include: [
+                { 
+                    model: MaterialRequestItem,
+                    include: [{ model: Material, attributes: ['material_name', 'unit', 'material_code'] }]
+                },
+                { model: User, as: 'Requestor', attributes: ['username', 'email'] }, // Assuming 'requested_by' maps to this
+                { model: SubContractor, attributes: ['company_name'] }
+            ],
+            order: [['created_at', 'DESC']]
+        });
+        res.json(requests);
+    } catch (error) {
+        console.error("Fetch Requests Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// 5. Approve Request
+exports.approveRequest = async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { role, id } = req.user; // From Auth Middleware
+        const { remarks } = req.body;
+
+        const request = await MaterialRequest.findByPk(requestId);
+        if (!request) return res.status(404).json({ message: "Request not found" });
+
+        // Logic: Update status based on who is approving
+        let newStatus = request.status;
+        
+        if (role === 'contractor') {
+            newStatus = request.status === 'consultant_approved' ? 'both_approved' : 'contractor_approved';
+            await request.update({
+                contractor_approved_by: id,
+                contractor_approved_at: new Date(),
+                contractor_remarks: remarks,
+                status: newStatus
+            });
+        } else if (role === 'consultant') {
+            newStatus = request.status === 'contractor_approved' ? 'both_approved' : 'consultant_approved';
+            await request.update({
+                consultant_approved_by: id,
+                consultant_approved_at: new Date(),
+                consultant_remarks: remarks,
+                status: newStatus
+            });
+        } else if (role === 'admin' || role === 'owner') {
+             // Admin force approval
+             newStatus = 'both_approved';
+             await request.update({ status: newStatus, remarks: `Force approved by ${role}` });
+        } else {
+            return res.status(403).json({ message: "Not authorized to approve" });
+        }
+
+        res.json({ message: "Request Approved", status: newStatus });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
