@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+<<<<<<< HEAD
 import { fetchProjectDetails, assignContractor } from '../features/projects/projectSlice';
+=======
+import { fetchProjectDetails, fetchContractors, assignContractor } from '../features/projects/projectSlice';
+>>>>>>> 0797c1084655e3d033f26389f02d1694cba4ce17
 import { Loader2, MapPin, Calendar, DollarSign, Users, Plus, ArrowLeft } from 'lucide-react';
 
 const ProjectDetails = () => {

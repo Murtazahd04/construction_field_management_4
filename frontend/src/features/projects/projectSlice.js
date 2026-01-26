@@ -34,15 +34,15 @@ export const fetchProjectDetails = createAsyncThunk('projects/fetchDetails', asy
     }
 });
 
-// // 4. Fetch Available Contractors List
-// export const fetchContractors = createAsyncThunk('projects/fetchContractors', async (_, thunkAPI) => {
-//     try {
-//         const response = await apiyb.get('/projects/contractors/list');
-//         return response.data;
-//     } catch (error) {
-//         return thunkAPI.rejectWithValue(error.message);
-//     }
-// });
+// 4. Fetch Available Contractors List
+export const fetchContractors = createAsyncThunk('projects/fetchContractors', async (_, thunkAPI) => {
+    try {
+        const response = await apiyb.get('/projects/contractors/list');
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
+});
 
 // 5. Assign Contractor
 export const assignContractor = createAsyncThunk('projects/assign', async (data, thunkAPI) => {
@@ -118,10 +118,10 @@ const projectSlice = createSlice({
       })
       .addCase(fetchProjectDetails.rejected, (state) => { state.loading = false; })
 
-      // // Fetch Contractors List
-      // .addCase(fetchContractors.fulfilled, (state, action) => {
-      //   state.contractorsList = action.payload;
-      // })
+      // Fetch Contractors List
+      .addCase(fetchContractors.fulfilled, (state, action) => {
+        state.contractorsList = action.payload;
+      })
 
       // Fetch DPRs
       .addCase(fetchProjectDPRs.fulfilled, (state, action) => {

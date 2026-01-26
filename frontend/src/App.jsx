@@ -27,11 +27,11 @@ function App() {
           <Route path="/admin-panel" element={<AdminPanel/>} />
           
           {/* User/Member 2 Routes */}
-          {/* UPDATED LINE BELOW */}
-          <Route path="/dashboard" element={<Dashboard />} /> 
+          <Route path="/dashboard" element={<div className="p-10">Dashboard Coming Soon...</div>} />
+          <Route path="/projects" element={<Projects />} /> {/* <--- New Route */}
           
-          <Route path="/projects" element={<Projects />} />
-          
+          {/* Placeholder for Project Details (Coming next) */}
+          <Route path="/projects/:id" element={<div className="p-10">Project Details View Coming Soon...</div>} />
         </Routes>
       </Router>
     </Provider>
